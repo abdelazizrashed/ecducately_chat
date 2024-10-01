@@ -1,10 +1,8 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:educately_chat/config/app_logger.dart';
 import 'package:educately_chat/config/app_sp_man.dart';
 import 'package:educately_chat/modules/auth/models/user_model.dart';
-import 'package:educately_chat/modules/messaging/models/conversation_model.dart';
 import 'package:educately_chat/modules/messaging/models/message_model.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
@@ -53,8 +51,7 @@ class ConvBloc extends Bloc<ConvEvent, ConvState> {
 
     // Get convo information
     final conv = await db.collection("conversation").doc(convId).get();
-    final convModel = ConversationModel.fromJson(conv.data()!);
-    for (var part in convModel.participants) {
+    for (var part in conv.data()!['participants']) {
       final user = await db
           .collection("users")
           .doc(part)
@@ -70,7 +67,6 @@ class ConvBloc extends Bloc<ConvEvent, ConvState> {
         subtitle = user.data()!.email;
         photo = user.data()!.photo;
         otherId = part;
-        AppLogger.info(tag: "ConvoBloc", value: "Emit ConvLoaded");
       }
     }
     emit(ConvLoaded());
@@ -102,7 +98,6 @@ class ConvBloc extends Bloc<ConvEvent, ConvState> {
       ));
     }
     messages.sort((a, b) => b.time.compareTo(a.time));
-    AppLogger.info(tag: "ConvoBloc Stream", value: "Emit ConvLoaded");
     return ConvLoaded();
   }
 
@@ -121,8 +116,8 @@ class ConvBloc extends Bloc<ConvEvent, ConvState> {
   }
 
   Future<void> _onConvSendMessageEvent(event, Emitter<ConvState> emit) async {
-    final doc =
-        db.collection("conversation").doc(convId).collection("messages").doc();
+    final convRef = db.collection("conversation").doc(convId);
+    final doc = convRef.collection("messages").doc();
     await doc.set({
       "id": doc.id,
       "sender": AppSpMan.user.get()!.uid,
@@ -130,6 +125,12 @@ class ConvBloc extends Bloc<ConvEvent, ConvState> {
       "time": Timestamp.fromDate(DateTime.now()),
       "uuid": const Uuid().v4(),
     });
+    final conv = await convRef.get();
+    final cData = conv.data()!;
+    cData["lastMessage"] = event.text;
+    cData["lastMessageTime"] = Timestamp.fromDate(DateTime.now());
+    await convRef.set(cData);
+
     emit(ConvLoaded());
   }
 
@@ -167,7 +168,6 @@ class ConvBloc extends Bloc<ConvEvent, ConvState> {
   }
 
   Future<void> _startTypingStream(emit) async {
-    AppLogger.info(tag: "ConvoBloc Typing Stream", value: "startTypingStream");
     typingStream = db.collection("conversation").doc(convId).snapshots();
     await emit.forEach<DocumentSnapshot<Map<String, dynamic>>>(
       typingStream!,
@@ -177,11 +177,8 @@ class ConvBloc extends Bloc<ConvEvent, ConvState> {
   }
 
   ConvLoaded _onTypingStream(DocumentSnapshot<Map<String, dynamic>> event) {
-    AppLogger.info(tag: "ConvoBloc Typing Stream", value: "onData");
     if (event.data()?["typing"] != null) {
       isTyping = event.data()!["typing"][otherId] ?? false;
-      AppLogger.info(
-          tag: "ConvoBloc Typing Stream", value: "isTyping: $isTyping");
     }
     return ConvLoaded();
   }

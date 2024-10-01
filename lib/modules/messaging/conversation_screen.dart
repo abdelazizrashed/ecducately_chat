@@ -13,7 +13,11 @@ import 'dart:ui';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ConversationScreen extends StatefulWidget {
-  const ConversationScreen({super.key});
+  const ConversationScreen({
+    super.key,
+    required this.convId,
+  });
+  final String convId;
 
   @override
   State<ConversationScreen> createState() => _ConversationScreenState();
@@ -24,7 +28,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
   @override
   void initState() {
     bloc = ConvBloc.of(context);
-    bloc.add(const ConvInitEvent("test"));
+    bloc.add(ConvInitEvent(widget.convId));
     bloc.add(ConvInitTypingStream());
     bloc.add(ConvInitOnlineStream());
     AuthBloc.of(context).add(AuthStartOnlineUpdate());
@@ -38,7 +42,6 @@ class _ConversationScreenState extends State<ConversationScreen> {
         return Scaffold(
           extendBodyBehindAppBar: true,
           appBar: _buildAppBar(context),
-          // backgroundColor: ,
           body: Container(
             width: context.width,
             height: context.height,
@@ -145,14 +148,14 @@ class _ConversationScreenState extends State<ConversationScreen> {
     final appBar = AppBar(
       elevation: 0,
       backgroundColor: AppColors.appBar,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back_ios),
+        onPressed: () {
+          Navigator.of(context).pop();
+        },
+      ),
       title: Row(
         children: [
-          IconButton(
-            icon: const Icon(Icons.arrow_back_ios),
-            onPressed: () {
-              // TODO (abdelaziz): Goback
-            },
-          ),
           Expanded(
             child: Column(
               children: [

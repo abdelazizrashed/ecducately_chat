@@ -38,14 +38,13 @@ class _LoginScreenState extends State<LoginScreen> {
             SizedBox(
               height: 8.h,
             ),
-            // _buildRememberMeAndForogotPass(context),
             SizedBox(
               height: 48.h,
             ),
             BlocConsumer<AuthBloc, AuthState>(
               listener: (context, state) {
                 if (state is AuthLoaded) {
-                  AppNavigator.goConversationScreen(context);
+                  AppNavigator.goChatsScreen(context);
                 }
                 if (state is AuthError) {
                   showToast(msg: state.message, isError: true);
@@ -68,7 +67,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 );
               },
             ),
-
             SizedBox(
               height: 8.h,
             ),
