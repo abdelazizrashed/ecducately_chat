@@ -1,9 +1,12 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:educately_chat/config/app_logger.dart';
+import 'package:educately_chat/config/app_navigator.dart';
 import 'package:educately_chat/config/app_sp_man.dart';
-import 'package:educately_chat/config/app_strings.dart';
+import 'package:educately_chat/globals.dart';
 import 'package:educately_chat/modules/auth/models/user_model.dart';
 import 'package:educately_chat/modules/chats/models/conversation_model.dart';
 import 'package:equatable/equatable.dart';
@@ -19,6 +22,7 @@ class ChatsBloc extends Bloc<ChatsEvent, ChatsState> {
 
   ChatsBloc() : super(ChatsInitial()) {
     on<ChatsGetHistoryEvent>(_onChatsGetHistoryEvent);
+    on<ChatsCreateConversationEvent>(_onChatsCreateConversationEvent);
   }
   final db = FirebaseFirestore.instance;
 
@@ -67,5 +71,17 @@ class ChatsBloc extends Bloc<ChatsEvent, ChatsState> {
         .compareTo(a.lastMessageTime ?? DateTime.now()));
     AppLogger.info(tag: "ChatsoBloc Stream", value: "Emit ConvLoaded");
     return ChatsLoaded();
+  }
+
+  Future<void> _onChatsCreateConversationEvent(
+      ChatsCreateConversationEvent event, Emitter<ChatsState> emit) async {
+    final doc = db.collection("conversation").doc();
+    await doc.set({
+      'id': doc.id,
+      "isActive": false,
+      "participants": [AppSpMan.user.get()!.uid, event.user.uid],
+    });
+    AppNavigator.goConversationScreen(navigatorKey.currentState!.context,
+        convId: doc.id);
   }
 }

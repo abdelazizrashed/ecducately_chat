@@ -129,6 +129,7 @@ class ConvBloc extends Bloc<ConvEvent, ConvState> {
     final cData = conv.data()!;
     cData["lastMessage"] = event.text;
     cData["lastMessageTime"] = Timestamp.fromDate(DateTime.now());
+    cData['isActive'] = true;
     await convRef.set(cData);
 
     emit(ConvLoaded());

@@ -15,3 +15,5 @@ class SearchQueryEvent extends SearchEvent {
   @override
   List<Object> get props => [query];
 }
+
+class SearchResetEvent extends SearchEvent {}

@@ -42,9 +42,10 @@ class AppNavigator {
   }) {
     Navigator.of(context).push(
       MaterialPageRoute(
-          builder: (context) => ConversationScreen(
-                convId: convId,
-              )),
+        builder: (context) => ConversationScreen(
+          convId: convId,
+        ),
+      ),
     );
   }
 

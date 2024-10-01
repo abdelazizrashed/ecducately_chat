@@ -16,6 +16,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
 
   SearchBloc() : super(SearchInitial()) {
     on<SearchQueryEvent>(_onSearchQueryEvent);
+    on<SearchResetEvent>(_onSearchResetEvent);
   }
 
   List<UserModel> users = [];
@@ -52,13 +53,23 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
           final exist =
               conversations.map((e) => e.id).contains(convo.docs.first.id);
           if (!exist) {
-            conversations.add(ConversationModel.fromJson(
+            conversations.add(ConversationModel.fromJsonFirestore(
               convo.docs.first.data(),
+              usersSnapshot.docs
+                  .map((e) => UserModel.fromJson(e.data()))
+                  .toList(),
             ));
           }
         }
       }
     }
     emit(SearchLoaded());
+  }
+
+  FutureOr<void> _onSearchResetEvent(
+      SearchResetEvent event, Emitter<SearchState> emit) {
+    users.clear();
+    conversations.clear();
+    emit(SearchInitial());
   }
 }

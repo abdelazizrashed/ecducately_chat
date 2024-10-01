@@ -70,8 +70,11 @@ class _ChatsScreenState extends State<ChatsScreen> {
             return ListView.builder(
               itemCount: bloc.chats.length,
               itemBuilder: (context, index) {
-                return ChatTileWidget(
-                  model: bloc.chats[index],
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 16.0),
+                  child: ChatTileWidget(
+                    model: bloc.chats[index],
+                  ),
                 );
               },
             );

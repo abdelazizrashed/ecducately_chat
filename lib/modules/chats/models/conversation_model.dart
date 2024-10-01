@@ -6,6 +6,7 @@ import 'package:equatable/equatable.dart';
 class ConversationModel extends Equatable {
   final String id;
   final String lastMessage;
+  final bool isActive;
   final DateTime? lastMessageTime;
   final List<String> participants;
   final UserModel? user;
@@ -14,6 +15,7 @@ class ConversationModel extends Equatable {
     required this.id,
     required this.lastMessage,
     required this.participants,
+    this.isActive = true,
     this.user,
     this.lastMessageTime,
   });
@@ -34,6 +36,7 @@ class ConversationModel extends Equatable {
       lastMessage: json['lastMessage'] ?? "",
       user: user,
       lastMessageTime: time?.toDate(),
+      isActive: json['isActive'] ?? true,
       participants: (json['participants'] as List? ?? [])
           .map((e) => e.toString())
           .toList(),
@@ -44,6 +47,7 @@ class ConversationModel extends Equatable {
     return ConversationModel(
       id: json['id'] ?? "",
       lastMessage: json['lastMessage'] ?? "",
+      isActive: json['isActive'] ?? true,
       participants: (json['participants'] as List? ?? [])
           .map((e) => e.toString())
           .toList(),
