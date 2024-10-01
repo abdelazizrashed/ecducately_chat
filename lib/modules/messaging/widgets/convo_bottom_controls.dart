@@ -69,7 +69,7 @@ class _ConvoBottomControlsState extends State<ConvoBottomControls> {
                             showSend = false;
                           });
                         }
-                        // TODO (abdelaziz): Implement typing
+                        ConvBloc.of(context).add(const ConvSetTypingEvent());
                       },
                       onSubmitted: _sendMsgs,
                       textInputAction: TextInputAction.send,

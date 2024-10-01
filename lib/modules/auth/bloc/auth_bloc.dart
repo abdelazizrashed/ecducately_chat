@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:educately_chat/config/app_sp_man.dart';
 import 'package:educately_chat/modules/auth/repo/auth_repo.dart';
 import 'package:equatable/equatable.dart';
@@ -23,6 +24,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         super(AuthInitial()) {
     on<AuthLoginEvent>(_onAuthLoginEvent);
     on<AuthSignupEvent>(_onAuthSignEvent);
+    on<AuthStartOnlineUpdate>(_onAuthStartOnlineUpdate);
   }
 
   Future<void> _onAuthLoginEvent(
@@ -37,7 +39,30 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       await AppSpMan.isLoggedIn.save(true);
       await AppSpMan.user.save(user);
       emit(AuthLoaded());
+      await _startUpdatingOnlineStatus(emit);
     }
+  }
+
+  int updatePeriodSecs = 3;
+  Stream? updateStatusStream;
+
+  _startUpdatingOnlineStatus(Emitter<AuthState> emit) async {
+    updateStatusStream =
+        Stream.periodic(Duration(seconds: updatePeriodSecs), (i) async {
+      final db = FirebaseFirestore.instance;
+      final ref = db.collection("users").doc(AppSpMan.user.get()!.uid);
+      final doc = await ref.get();
+      var data = doc.data() ?? {};
+      data["lastOnline"] = Timestamp.now();
+      await ref.set(data);
+      return i;
+    });
+    await emit.forEach(
+      updateStatusStream!,
+      onData: (event) {
+        return AuthLoaded();
+      },
+    );
   }
 
   Future<void> _onAuthSignEvent(
@@ -55,6 +80,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       await AppSpMan.user.save(user);
 
       emit(AuthLoaded());
+      await _startUpdatingOnlineStatus(emit);
     }
+  }
+
+  Future<void> _onAuthStartOnlineUpdate(
+      AuthStartOnlineUpdate event, Emitter<AuthState> emit) async {
+    await _startUpdatingOnlineStatus(emit);
   }
 }

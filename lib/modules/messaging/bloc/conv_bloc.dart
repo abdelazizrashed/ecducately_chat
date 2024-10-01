@@ -28,6 +28,9 @@ class ConvBloc extends Bloc<ConvEvent, ConvState> {
     on<ConvInitEvent>(_onConvInitEvent);
     on<ConvDeactvateEvent>(_onConvDeactvateEvent);
     on<ConvSendMsgEvent>(_onConvSendMessageEvent);
+    on<ConvSetTypingEvent>(_onConvSetTypingEvent);
+    on<ConvInitTypingStream>(_onConvInitTypingStream);
+    on<ConvInitOnlineStream>(_onConvInitOnlineStream);
   }
 
   bool isGroup = false;
@@ -35,10 +38,16 @@ class ConvBloc extends Bloc<ConvEvent, ConvState> {
   List<MessageModel> messages = [];
   String title = "";
   String subtitle = "";
+  bool isTyping = false;
+  bool isOnline = false;
   String photo = "";
+  String otherId = "";
+  DateTime? lastSeen;
   final db = FirebaseFirestore.instance;
   String convId = "";
   Stream<QuerySnapshot<Map<String, dynamic>>>? msgsStream;
+  Stream<DocumentSnapshot<Map<String, dynamic>>>? typingStream;
+  Stream<DocumentSnapshot<Map<String, dynamic>>>? onlineStream;
 
   Future<void> _onConvInitEvent(
       ConvInitEvent event, Emitter<ConvState> emit) async {
@@ -63,17 +72,18 @@ class ConvBloc extends Bloc<ConvEvent, ConvState> {
         title = user.data()!.name;
         subtitle = user.data()!.email;
         photo = user.data()!.photo;
+        otherId = part;
         AppLogger.info(tag: "ConvoBloc", value: "Emit ConvLoaded");
       }
     }
     emit(ConvLoaded());
     // List for realtime messages
-    await _startStream(emit);
+    await _startMessagesStream(emit);
   }
 
   // TODO (abdelaziz): This should be refactored further for readablity, but I am running out
   // of time.
-  Future<void> _startStream(Emitter<ConvState> emit) async {
+  Future<void> _startMessagesStream(Emitter<ConvState> emit) async {
     msgsStream = db
         .collection("conversation")
         .doc(convId)
@@ -124,5 +134,82 @@ class ConvBloc extends Bloc<ConvEvent, ConvState> {
       "uuid": const Uuid().v4(),
     });
     emit(ConvLoaded());
+  }
+
+  // DateTime? lastTypingUpdate;
+  int minUpdatePeriodSecs = 2;
+
+  Future<void> _onConvSetTypingEvent(
+      ConvSetTypingEvent event, Emitter<ConvState> emit) async {
+    await _setTyping();
+    await Future.delayed(Duration(seconds: minUpdatePeriodSecs));
+    await _unsetTyping();
+  }
+
+  Future<void> _setTyping() async {
+    final ref = db.collection("conversation").doc(convId);
+    final res = await ref.get();
+    var data = res.data() ?? {};
+    data["typing"] ??= {};
+    data["typing"][AppSpMan.user.get()!.uid] = true;
+    await ref.set(data);
+  }
+
+  Future<void> _unsetTyping() async {
+    final ref = db.collection("conversation").doc(convId);
+    final res = await ref.get();
+    var data = res.data() ?? {};
+    data["typing"] ??= {};
+    data["typing"][AppSpMan.user.get()!.uid] = false;
+    await ref.set(data);
+  }
+
+  Future<void> _onConvInitTypingStream(
+      ConvInitTypingStream event, Emitter<ConvState> emit) async {
+    await _startTypingStream(emit);
+  }
+
+  Future<void> _startTypingStream(emit) async {
+    AppLogger.info(tag: "ConvoBloc Typing Stream", value: "startTypingStream");
+    typingStream = db.collection("conversation").doc(convId).snapshots();
+    await emit.forEach<DocumentSnapshot<Map<String, dynamic>>>(
+      typingStream!,
+      onData: _onTypingStream,
+      onError: (event, error) => ConvError(error.toString()),
+    );
+  }
+
+  ConvLoaded _onTypingStream(DocumentSnapshot<Map<String, dynamic>> event) {
+    AppLogger.info(tag: "ConvoBloc Typing Stream", value: "onData");
+    if (event.data()?["typing"] != null) {
+      isTyping = event.data()!["typing"][otherId] ?? false;
+      AppLogger.info(
+          tag: "ConvoBloc Typing Stream", value: "isTyping: $isTyping");
+    }
+    return ConvLoaded();
+  }
+
+  Future<void> _onConvInitOnlineStream(
+      ConvInitOnlineStream event, Emitter<ConvState> emit) async {
+    await _startOnlineStream(emit);
+  }
+
+  Future<void> _startOnlineStream(emit) async {
+    while (otherId.trim().isEmpty) {
+      await Future.delayed(const Duration(seconds: 1));
+    }
+    onlineStream = db.collection("users").doc(otherId).snapshots();
+    await emit.forEach<DocumentSnapshot<Map<String, dynamic>>>(
+      onlineStream!,
+      onData: _onOnlineStream,
+      onError: (event, error) => ConvError(error.toString()),
+    );
+  }
+
+  ConvLoaded _onOnlineStream(DocumentSnapshot<Map<String, dynamic>> event) {
+    if (event.data()?["lastOnline"] != null) {
+      lastSeen = (event.data()!["lastOnline"] as Timestamp).toDate();
+    }
+    return ConvLoaded();
   }
 }

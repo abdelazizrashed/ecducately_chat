@@ -15,6 +15,10 @@ class ConvInitEvent extends ConvEvent {
   List<Object> get props => [convId];
 }
 
+class ConvInitTypingStream extends ConvEvent {}
+
+class ConvInitOnlineStream extends ConvEvent {}
+
 class ConvDeactvateEvent extends ConvEvent {}
 
 class ConvSendMsgEvent extends ConvEvent {
@@ -23,4 +27,8 @@ class ConvSendMsgEvent extends ConvEvent {
 
   @override
   List<Object> get props => [text];
+}
+
+class ConvSetTypingEvent extends ConvEvent {
+  const ConvSetTypingEvent();
 }

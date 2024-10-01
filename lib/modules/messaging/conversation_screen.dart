@@ -1,10 +1,12 @@
 import 'package:educately_chat/config/app_colors.dart';
 import 'package:educately_chat/config/app_size.dart';
 import 'package:educately_chat/config/app_theme.dart';
+import 'package:educately_chat/modules/auth/bloc/auth_bloc.dart';
 import 'package:educately_chat/modules/messaging/bloc/conv_bloc.dart';
 import 'package:educately_chat/modules/messaging/models/message_model.dart';
 import 'package:educately_chat/modules/messaging/widgets/conv_message_widget.dart';
 import 'package:educately_chat/modules/messaging/widgets/convo_bottom_controls.dart';
+import 'package:educately_chat/utils/datetime_utils.dart';
 import 'package:flutter/material.dart';
 import 'dart:ui';
 
@@ -23,6 +25,9 @@ class _ConversationScreenState extends State<ConversationScreen> {
   void initState() {
     bloc = ConvBloc.of(context);
     bloc.add(const ConvInitEvent("test"));
+    bloc.add(ConvInitTypingStream());
+    bloc.add(ConvInitOnlineStream());
+    AuthBloc.of(context).add(AuthStartOnlineUpdate());
     super.initState();
   }
 
@@ -126,6 +131,16 @@ class _ConversationScreenState extends State<ConversationScreen> {
     );
   }
 
+  String _getSubtitle() {
+    if (bloc.isTyping) {
+      return "Typing...";
+    }
+    if (bloc.lastSeen == null) {
+      return "";
+    }
+    return DateTimeUtils.getLastSeen(bloc.lastSeen!);
+  }
+
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     final appBar = AppBar(
       elevation: 0,
@@ -146,7 +161,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
                   style: context.textTheme.s18.w800,
                 ),
                 Text(
-                  bloc.subtitle,
+                  _getSubtitle(),
                   style: context.textTheme.s14.w400.setColor(AppColors.subtext),
                 ),
               ],

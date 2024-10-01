@@ -12,7 +12,8 @@ import 'package:flutter/material.dart';
 /// navigation method.
 class AppNavigator {
   static Widget get home {
-    if (AppSpMan.isLoggedIn.get()!) {
+    // return const LoginScreen();
+    if (AppSpMan.isLoggedIn.get() ?? false) {
       return const ConversationScreen();
     }
     return const LoginScreen();
