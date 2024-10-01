@@ -52,6 +52,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   _startUpdatingOnlineStatus(Emitter<AuthState> emit) async {
     updateStatusStream =
         Stream.periodic(Duration(seconds: updatePeriodSecs), (i) async {
+      if (!AppSpMan.isLoggedIn.get()!) {
+        return i;
+      }
       final db = FirebaseFirestore.instance;
       final ref = db.collection("users").doc(AppSpMan.user.get()!.uid);
       final doc = await ref.get();
@@ -63,6 +66,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     await emit.forEach(
       updateStatusStream!,
       onData: (event) {
+        if (!AppSpMan.isLoggedIn.get()!) {
+          return AuthInitial();
+        }
         return AuthLoaded();
       },
     );

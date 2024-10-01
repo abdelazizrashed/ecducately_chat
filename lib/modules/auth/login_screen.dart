@@ -43,6 +43,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             BlocConsumer<AuthBloc, AuthState>(
               listener: (context, state) {
+                print(state);
                 if (state is AuthLoaded) {
                   AppNavigator.goChatsScreen(context);
                 }
