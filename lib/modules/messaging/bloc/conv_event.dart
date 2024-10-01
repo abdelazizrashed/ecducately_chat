@@ -16,3 +16,11 @@ class ConvInitEvent extends ConvEvent {
 }
 
 class ConvDeactvateEvent extends ConvEvent {}
+
+class ConvSendMsgEvent extends ConvEvent {
+  final String text;
+  const ConvSendMsgEvent(this.text);
+
+  @override
+  List<Object> get props => [text];
+}

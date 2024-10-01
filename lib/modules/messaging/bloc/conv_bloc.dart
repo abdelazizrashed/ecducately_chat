@@ -27,6 +27,7 @@ class ConvBloc extends Bloc<ConvEvent, ConvState> {
         super(ConvInitial()) {
     on<ConvInitEvent>(_onConvInitEvent);
     on<ConvDeactvateEvent>(_onConvDeactvateEvent);
+    on<ConvSendMsgEvent>(_onConvSendMessageEvent);
   }
 
   bool isGroup = false;
@@ -67,9 +68,15 @@ class ConvBloc extends Bloc<ConvEvent, ConvState> {
     }
     emit(ConvLoaded());
     // List for realtime messages
+    await _startStream(emit);
+  }
+
+  // TODO (abdelaziz): This should be refactored further for readablity, but I am running out
+  // of time.
+  Future<void> _startStream(Emitter<ConvState> emit) async {
     msgsStream = db
         .collection("conversation")
-        .doc(event.convId)
+        .doc(convId)
         .collection("messages")
         .snapshots();
     await emit.forEach<QuerySnapshot<Map<String, dynamic>>>(
@@ -87,6 +94,7 @@ class ConvBloc extends Bloc<ConvEvent, ConvState> {
         participants,
       ));
     }
+    messages.sort((a, b) => b.time.compareTo(a.time));
     AppLogger.info(tag: "ConvoBloc Stream", value: "Emit ConvLoaded");
     return ConvLoaded();
   }
@@ -103,5 +111,18 @@ class ConvBloc extends Bloc<ConvEvent, ConvState> {
     photo = "";
     convId = "";
     emit(ConvInitial());
+  }
+
+  Future<void> _onConvSendMessageEvent(event, Emitter<ConvState> emit) async {
+    final doc =
+        db.collection("conversation").doc(convId).collection("messages").doc();
+    await doc.set({
+      "id": doc.id,
+      "sender": AppSpMan.user.get()!.uid,
+      "text": event.text,
+      "time": Timestamp.fromDate(DateTime.now()),
+      "uuid": const Uuid().v4(),
+    });
+    emit(ConvLoaded());
   }
 }

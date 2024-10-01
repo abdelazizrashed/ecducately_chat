@@ -1,14 +1,32 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:educately_chat/config/app_colors.dart';
 import 'package:educately_chat/config/app_size.dart';
 import 'package:educately_chat/config/app_strings.dart';
 import 'package:educately_chat/gen/assets.gen.dart';
+import 'package:educately_chat/modules/messaging/bloc/conv_bloc.dart';
 import 'package:flutter/material.dart';
 
-class ConvoBottomControls extends StatelessWidget {
+class ConvoBottomControls extends StatefulWidget {
   const ConvoBottomControls({
     super.key,
   });
+
+  @override
+  State<ConvoBottomControls> createState() => _ConvoBottomControlsState();
+}
+
+class _ConvoBottomControlsState extends State<ConvoBottomControls> {
+  final controller = TextEditingController();
+
+  bool showSend = false;
+
+  _sendMsgs(String msg) {
+    if (msg.trim().isNotEmpty) {
+      ConvBloc.of(context).add(ConvSendMsgEvent(msg));
+      controller.clear();
+      showSend = false;
+      setState(() {});
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,33 +41,6 @@ class ConvoBottomControls extends StatelessWidget {
             children: [
               InkWell(
                 onTap: () async {
-                  final db = FirebaseFirestore.instance;
-                  final res =
-                      await db.collection("conversation").doc("test").get();
-                  final res1 = await db
-                      .collection("conversation")
-                      .doc("test")
-                      .collection("messages")
-                      .doc("test")
-                      .get();
-//
-                  // print("time: ${res1.data()!["time"]}");
-                  final time = res1.data()!["time"] as Timestamp;
-                  // print(time.toDate());
-                  final sender = res1.data()!["sender"] as DocumentReference;
-                  db
-                      .collection("conversation")
-                      .doc("test")
-                      .collection("messages")
-                      .snapshots()
-                      .listen((data) => print(data.docs.map((e) => e.data())));
-                  // final user = await sender.get();
-                  // print(user.data());
-
-                  // for (var entry in res1.data()!.entries) {
-                  //   print("${entry.key} : ${entry.value}");
-                  // }
-                  // print(res1.data());
                   // TODO (abdelaziz): Implement attachment
                 },
                 child: Padding(
@@ -67,14 +58,20 @@ class ConvoBottomControls extends StatelessWidget {
                     height: 32.h,
                     child: TextField(
                       scrollPadding: EdgeInsets.zero,
-                      // TODO (abdelaziz): Add Controller from bloc
-                      // controller: controller,
+                      controller: controller,
                       onChanged: (val) {
+                        if (val.trim().isNotEmpty) {
+                          setState(() {
+                            showSend = true;
+                          });
+                        } else {
+                          setState(() {
+                            showSend = false;
+                          });
+                        }
                         // TODO (abdelaziz): Implement typing
                       },
-                      onSubmitted: (val) {
-                        // TODO (abdelaziz): Implement send
-                      },
+                      onSubmitted: _sendMsgs,
                       textInputAction: TextInputAction.send,
                       decoration: InputDecoration(
                           filled: true,
@@ -88,13 +85,22 @@ class ConvoBottomControls extends StatelessWidget {
                   ),
                 ),
               ),
-              InkWell(
-                // onTap: _recordAudio,
-                child: Assets.icons.microphone.image(
-                  height: 32.h,
-                  color: AppColors.icon,
+              if (showSend)
+                InkWell(
+                  onTap: () => _sendMsgs(controller.text),
+                  child: const Icon(
+                    Icons.send_rounded,
+                    color: Colors.blue,
+                  ),
                 ),
-              ),
+              if (!showSend)
+                InkWell(
+                  // onTap: _recordAudio,
+                  child: Assets.icons.microphone.image(
+                    height: 32.h,
+                    color: AppColors.icon,
+                  ),
+                ),
             ],
           ),
           SizedBox(

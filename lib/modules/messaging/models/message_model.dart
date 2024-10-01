@@ -7,6 +7,9 @@ class MessageModel extends Equatable {
   final UserModel sender;
   final String text;
   final DateTime time;
+
+  /// Universal Unique Identifier to used as a signigture identifier to
+  /// identify the sending message.
   final String uuid;
   final bool isSent;
 
