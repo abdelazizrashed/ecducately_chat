@@ -12,6 +12,8 @@ class AppColors {
   static const _msgBubbleOtherLight = Color(0xffffffff);
   static const _msgBubbleOtherDark = Color(0xff31252B);
 
+  static const _button = Color(0xff8F47FE);
+
   static const _iconLight = Color(0xff808080);
   static const _iconDark = Color(0xff808080);
 
@@ -30,6 +32,7 @@ class AppColors {
   static Brightness _brightness = Brightness.dark;
 
   static Color get text => isDarkMode ? _textDark : _text;
+  static Color get button => _button;
 
   static Color message(isSent) {
     if (isDarkMode) {

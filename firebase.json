@@ -1,0 +1,24 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "educatly-chat-b2272",
+          "appId": "1:278071064945:android:47440af2d31698860c9ed0",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "educatly-chat-b2272",
+          "configurations": {
+            "android": "1:278071064945:android:47440af2d31698860c9ed0"
+          }
+        }
+      }
+    }
+  },
+  "emulators": {
+    "singleProjectMode": true
+  }
+}
