@@ -1,74 +1,111 @@
 import 'package:educately_chat/config/app_colors.dart';
 import 'package:educately_chat/config/app_size.dart';
 import 'package:educately_chat/config/app_theme.dart';
-import 'package:educately_chat/modules/messaging/models/conv_message_model.dart';
-import 'package:educately_chat/modules/messaging/test_data/msg_model_test.dart';
+import 'package:educately_chat/modules/messaging/bloc/conv_bloc.dart';
+import 'package:educately_chat/modules/messaging/models/message_model.dart';
 import 'package:educately_chat/modules/messaging/widgets/conv_message_widget.dart';
 import 'package:educately_chat/modules/messaging/widgets/convo_bottom_controls.dart';
 import 'package:flutter/material.dart';
 import 'dart:ui';
 
-class ConversationScreen extends StatelessWidget {
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+class ConversationScreen extends StatefulWidget {
   const ConversationScreen({super.key});
 
   @override
+  State<ConversationScreen> createState() => _ConversationScreenState();
+}
+
+class _ConversationScreenState extends State<ConversationScreen> {
+  late ConvBloc bloc;
+  @override
+  void initState() {
+    bloc = ConvBloc.of(context);
+    bloc.add(const ConvInitEvent("test"));
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: _buildAppBar(context),
-      // backgroundColor: ,
-      body: Container(
-        width: context.width,
-        height: context.height,
-        decoration: _getBackgroundDecoration(),
-        child: Column(
-          children: [
-            Expanded(
-              child: _buildMsgs(context, testMsgs),
+    return BlocBuilder<ConvBloc, ConvState>(
+      builder: (context, state) {
+        return Scaffold(
+          extendBodyBehindAppBar: true,
+          appBar: _buildAppBar(context),
+          // backgroundColor: ,
+          body: Container(
+            width: context.width,
+            height: context.height,
+            decoration: _getBackgroundDecoration(),
+            child: Column(
+              children: [
+                Expanded(
+                  child: Builder(
+                    builder: (context) {
+                      if (state is ConvLoading) {
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      }
+                      if (state is ConvError) {
+                        return Center(
+                          child: Text(state.message),
+                        );
+                      }
+
+                      return _buildMsgs(context, bloc.messages);
+                    },
+                  ),
+                ),
+                SizedBox(
+                  height: 8.h,
+                ),
+                const ConvoBottomControls(),
+              ],
             ),
-            SizedBox(
-              height: 8.h,
-            ),
-            const ConvoBottomControls(),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildMsgs(BuildContext context, List<ConvMessageModel> msgs) {
+  Widget _buildMsgs(BuildContext context, List<MessageModel> msgs) {
     return Align(
       alignment: Alignment.bottomCenter,
-      child: ListView.separated(
-        itemCount: msgs.length + 1,
-        padding: EdgeInsets.zero,
-        reverse: true,
-        shrinkWrap: true,
-        separatorBuilder: (context, index) => SizedBox(
-          height: 2.h,
-        ),
-        itemBuilder: (context, index) {
-          // Extra padding so we can see the content behind the appBar
-          if (index == msgs.length) {
-            return SizedBox(
-              height: 110.h,
-            );
-          }
-          final msg = msgs[index];
-          bool isSecondary = false;
-          if (index != 0) {
-            // if multiple consecutive messages from same user don't show
-            // name or photo
-            if (msgs[index - 1].userId == msg.userId) {
-              isSecondary = true;
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+        child: ListView.separated(
+          itemCount: msgs.length + 1,
+          padding: EdgeInsets.zero,
+          reverse: true,
+          shrinkWrap: true,
+          separatorBuilder: (context, index) => SizedBox(
+            height: 2.h,
+          ),
+          itemBuilder: (context, index) {
+            // Extra padding so we can see the content behind the appBar
+            if (index == msgs.length) {
+              return SizedBox(
+                height: 110.h,
+              );
             }
-          }
-          return MessageWidget(
-            message: msg,
-            isSecondary: isSecondary,
-            // status: status,
-          );
-        },
+            final msg = msgs[index];
+            bool isSecondary = false;
+            if (index != 0) {
+              // if multiple consecutive messages from same user don't show
+              // name or photo
+              if (msgs[index - 1].sender.uid == msg.sender.uid) {
+                isSecondary = true;
+              }
+            }
+            return MessageWidget(
+              message: msg,
+              isSecondary: isSecondary,
+              // status: status,
+            );
+          },
+        ),
       ),
     );
   }
@@ -105,11 +142,11 @@ class ConversationScreen extends StatelessWidget {
             child: Column(
               children: [
                 Text(
-                  "Sebastian",
+                  bloc.title,
                   style: context.textTheme.s18.w800,
                 ),
                 Text(
-                  "last seen recently",
+                  bloc.subtitle,
                   style: context.textTheme.s14.w400.setColor(AppColors.subtext),
                 ),
               ],
@@ -117,12 +154,14 @@ class ConversationScreen extends StatelessWidget {
           ),
           ClipRRect(
             borderRadius: BorderRadius.circular(50.r),
-            child: Image.network(
-              img1,
-              width: 37.r,
-              height: 37.r,
-              fit: BoxFit.cover,
-            ),
+            child: bloc.photo == ""
+                ? null
+                : Image.network(
+                    bloc.photo,
+                    width: 37.r,
+                    height: 37.r,
+                    fit: BoxFit.cover,
+                  ),
           )
         ],
       ),

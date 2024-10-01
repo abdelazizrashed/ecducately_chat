@@ -1,6 +1,6 @@
 import 'package:educately_chat/config/app_colors.dart';
 import 'package:educately_chat/config/app_theme.dart';
-import 'package:educately_chat/modules/messaging/models/conv_message_model.dart';
+import 'package:educately_chat/modules/messaging/models/message_model.dart';
 import 'package:flutter/material.dart';
 
 class TextMessageWidget extends StatelessWidget {
@@ -8,7 +8,7 @@ class TextMessageWidget extends StatelessWidget {
     super.key,
     required this.message,
   });
-  final ConvMessageModel message;
+  final MessageModel message;
 
   @override
   Widget build(BuildContext context) {

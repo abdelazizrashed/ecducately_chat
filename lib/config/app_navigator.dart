@@ -1,3 +1,4 @@
+import 'package:educately_chat/config/app_sp_man.dart';
 import 'package:educately_chat/modules/auth/login_screen.dart';
 import 'package:educately_chat/modules/auth/signup_screen.dart';
 import 'package:educately_chat/modules/messaging/conversation_screen.dart';
@@ -11,9 +12,10 @@ import 'package:flutter/material.dart';
 /// navigation method.
 class AppNavigator {
   static Widget get home {
-    // return const SignupScreen();
+    if (AppSpMan.isLoggedIn.get()!) {
+      return const ConversationScreen();
+    }
     return const LoginScreen();
-    // return const ConversationScreen();
   }
 
   static void goLoginScreen(BuildContext context) {

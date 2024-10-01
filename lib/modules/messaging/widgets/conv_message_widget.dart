@@ -1,7 +1,7 @@
 import 'package:educately_chat/config/app_colors.dart';
 import 'package:educately_chat/config/app_size.dart';
 import 'package:educately_chat/config/app_theme.dart';
-import 'package:educately_chat/modules/messaging/models/conv_message_model.dart';
+import 'package:educately_chat/modules/messaging/models/message_model.dart';
 import 'package:educately_chat/modules/messaging/widgets/text_message_widget.dart';
 import 'package:educately_chat/utils/datetime_utils.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +13,7 @@ class MessageWidget extends StatefulWidget {
     required this.message,
   });
   final bool isSecondary;
-  final ConvMessageModel message;
+  final MessageModel message;
 
   @override
   State<MessageWidget> createState() => _MessageWidgetState();
@@ -69,7 +69,7 @@ class _MessageWidgetState extends State<MessageWidget> {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(42.r),
                     child: Image.network(
-                      widget.message.profilePic,
+                      widget.message.sender.photo,
                       width: 30.r,
                       height: 30.r,
                     ),
@@ -101,7 +101,7 @@ class _MessageWidgetState extends State<MessageWidget> {
         children: [
           if (!isSent && !widget.isSecondary)
             Text(
-              widget.message.username,
+              widget.message.sender.name,
               style:
                   context.textTheme.s12.w600.setColor(const Color(0xff00A700)),
             ),

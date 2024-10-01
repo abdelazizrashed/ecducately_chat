@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:educately_chat/config/app_colors.dart';
 import 'package:educately_chat/config/app_size.dart';
 import 'package:educately_chat/config/app_strings.dart';
@@ -21,7 +22,34 @@ class ConvoBottomControls extends StatelessWidget {
           Row(
             children: [
               InkWell(
-                onTap: () {
+                onTap: () async {
+                  final db = FirebaseFirestore.instance;
+                  final res =
+                      await db.collection("conversation").doc("test").get();
+                  final res1 = await db
+                      .collection("conversation")
+                      .doc("test")
+                      .collection("messages")
+                      .doc("test")
+                      .get();
+//
+                  // print("time: ${res1.data()!["time"]}");
+                  final time = res1.data()!["time"] as Timestamp;
+                  // print(time.toDate());
+                  final sender = res1.data()!["sender"] as DocumentReference;
+                  db
+                      .collection("conversation")
+                      .doc("test")
+                      .collection("messages")
+                      .snapshots()
+                      .listen((data) => print(data.docs.map((e) => e.data())));
+                  // final user = await sender.get();
+                  // print(user.data());
+
+                  // for (var entry in res1.data()!.entries) {
+                  //   print("${entry.key} : ${entry.value}");
+                  // }
+                  // print(res1.data());
                   // TODO (abdelaziz): Implement attachment
                 },
                 child: Padding(
