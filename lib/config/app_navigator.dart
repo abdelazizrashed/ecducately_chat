@@ -3,6 +3,7 @@ import 'package:educately_chat/modules/auth/login_screen.dart';
 import 'package:educately_chat/modules/auth/signup_screen.dart';
 import 'package:educately_chat/modules/chats/chats_screen.dart';
 import 'package:educately_chat/modules/messaging/conversation_screen.dart';
+import 'package:educately_chat/modules/search/search_screen.dart';
 import 'package:educately_chat/modules/settings/settings_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -57,6 +58,12 @@ class AppNavigator {
   static void goSettings(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute(builder: (context) => const SettingsScreen()),
+    );
+  }
+
+  static void goSearch(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) => const SearchScreen()),
     );
   }
 }

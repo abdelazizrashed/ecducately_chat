@@ -30,7 +30,7 @@ class _ChatsScreenState extends State<ChatsScreen> {
           children: [
             InkWell(
               onTap: () {
-                // TODO (abdelaziz): Go search screen
+                AppNavigator.goSearch(context);
               },
               child: const Icon(Icons.search_rounded),
             ),

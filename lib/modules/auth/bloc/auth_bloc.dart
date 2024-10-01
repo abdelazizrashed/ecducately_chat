@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:educately_chat/config/app_navigator.dart';
 import 'package:educately_chat/config/app_sp_man.dart';
+import 'package:educately_chat/globals.dart';
 import 'package:educately_chat/modules/auth/repo/auth_repo.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
@@ -25,6 +27,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthLoginEvent>(_onAuthLoginEvent);
     on<AuthSignupEvent>(_onAuthSignEvent);
     on<AuthStartOnlineUpdate>(_onAuthStartOnlineUpdate);
+    on<AuthLogoutEvent>(_onAuthLogoutEvent);
   }
 
   Future<void> _onAuthLoginEvent(
@@ -87,5 +90,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   Future<void> _onAuthStartOnlineUpdate(
       AuthStartOnlineUpdate event, Emitter<AuthState> emit) async {
     await _startUpdatingOnlineStatus(emit);
+  }
+
+  Future<void> _onAuthLogoutEvent(
+      AuthLogoutEvent event, Emitter<AuthState> emit) async {
+    await AppSpMan.isLoggedIn.save(false);
+    await AppSpMan.user.remove();
+    // ignore: use_build_context_synchronously
+    AppNavigator.goLoginScreen(navigatorKey.currentState!.context);
+    emit(AuthInitial());
   }
 }
