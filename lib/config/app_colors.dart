@@ -21,6 +21,12 @@ class AppColors {
   static const _subtext = Colors.black;
   static final _subtextDark = Colors.white.withOpacity(0.5);
 
+  static const _appBar = Color(0xffC8C7CB);
+  static final _appBarDark = Colors.black.withOpacity(0.2);
+
+  static const _background = Color(0xffB2B2B2);
+  static const _backgroundDark = Color(0xff3B3B43);
+
   static Brightness _brightness = Brightness.dark;
 
   static Color get text => isDarkMode ? _textDark : _text;
@@ -36,6 +42,9 @@ class AppColors {
   static Color get scaffold => isDarkMode ? _scaffoldDark : _scaffold;
 
   static Color get subtext => isDarkMode ? _subtextDark : _subtext;
+  static Color get appBar => isDarkMode ? _appBarDark : _appBar;
+
+  static Color get background => isDarkMode ? _backgroundDark : _background;
 
   static Brightness get brightness => _brightness;
   static set birghtness(Brightness bright) => _brightness = bright;

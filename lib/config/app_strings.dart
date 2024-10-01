@@ -3,4 +3,5 @@
 /// of the localisation solution you choose to use.
 class AppStrings {
   static const appName = "Educately Chat";
+  static const message = "Message";
 }
