@@ -1,16 +1,41 @@
-# educately_chat
+# Educatly Chat
 
-A new Flutter project.
+A Real-Time Chat Interface with Firebase Integration, Online Status, and Typing Indicators (Android Only) Using a Basic Dark Theme (Figma design file).
+This Project is the Task for Senior Flutter Developer @ Educatly
 
-## Getting Started
+## Running The project
 
-This project is a starting point for a Flutter application.
+* Flutter Version => 3.24.3
 
-A few resources to get you started if this is your first Flutter project:
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+1- Clone Project
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```
+git clone https://github.com/abdelazizrashed/ecducately_chat.git
+cd educately_chat
+```
+2- Setup Firebase project
+* Create Firebase Project
+* Setup Firebase Authentication with email authentication
+* Create a Firestore database
+
+3- Connecting Firebase with the project
+* Install [Firestore CLI](https://firebase.google.com/docs/cli?hl=en&authuser=2#install_the_firebase_cli)
+* run ```firebase login```
+* From any directory, run this command:
+
+```
+dart pub global activate flutterfire_cli
+```
+* Then, at the root of your Flutter project directory, run this command:
+  
+  replace \<your-project-id\> with your project id
+
+```
+flutterfire configure --project=<your-project-id>
+```
+
+4- Run the application
+```
+flutter run
+```
