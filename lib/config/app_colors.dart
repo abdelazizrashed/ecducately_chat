@@ -26,10 +26,8 @@ class AppColors {
   static const _appBar = Color(0xffC8C7CB);
   static final _appBarDark = const Color(0xff333380).withOpacity(0.5);
 
-  static const _background = Color(0xffB2B2B2);
+  static final _background = const Color(0xffB2B2B2).withOpacity(0.5);
   static const _backgroundDark = Color(0xff3B3B43);
-
-  static Brightness _brightness = Brightness.dark;
 
   static Color get text => isDarkMode ? _textDark : _text;
   static Color get button => _button;
@@ -49,8 +47,8 @@ class AppColors {
 
   static Color get background => isDarkMode ? _backgroundDark : _background;
 
-  static Brightness get brightness => _brightness;
-  static set birghtness(Brightness bright) => _brightness = bright;
+  static Brightness get brightness =>
+      isDarkMode ? Brightness.dark : Brightness.light;
 
   static bool get isDarkMode => AppSpMan.isDarkMode.get() ?? true;
 }

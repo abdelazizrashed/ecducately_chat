@@ -5,6 +5,21 @@ class DateTimeUtils {
     return DateFormat.jm().format(time); // 10:00 AM.
   }
 
+  static String getChatTime(DateTime time) {
+    final now = DateTime.now();
+    final diff = now.difference(time);
+    if (diff.inSeconds < 60) {
+      return "Just now";
+    }
+    if (diff.inMinutes < 60) {
+      return "${diff.inMinutes} minutes ago";
+    }
+    if (diff.inHours < 24) {
+      return "${diff.inHours} hours ago";
+    }
+    return DateFormat("dd MMM yyyy").format(time);
+  }
+
   static String getLastSeen(DateTime time) {
     final now = DateTime.now();
     final diff = now.difference(time);

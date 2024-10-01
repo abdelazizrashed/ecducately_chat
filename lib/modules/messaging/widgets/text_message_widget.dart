@@ -15,7 +15,7 @@ class TextMessageWidget extends StatelessWidget {
     return Text(
       message.text,
       style: context.textTheme.s14.w400.setColor(
-        message.isSent ? Colors.white : AppColors.text,
+        AppColors.text,
       ),
     );
   }

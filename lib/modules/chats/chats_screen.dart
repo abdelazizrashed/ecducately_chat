@@ -1,3 +1,5 @@
+import 'package:educately_chat/config/app_navigator.dart';
+import 'package:educately_chat/config/app_size.dart';
 import 'package:educately_chat/config/app_strings.dart';
 import 'package:educately_chat/modules/chats/bloc/chats_bloc.dart';
 import 'package:educately_chat/modules/chats/widgets/chat_tile_widget.dart';
@@ -24,29 +26,57 @@ class _ChatsScreenState extends State<ChatsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(AppStrings.appName),
+        title: Row(
+          children: [
+            InkWell(
+              onTap: () {
+                // TODO (abdelaziz): Go search screen
+              },
+              child: const Icon(Icons.search_rounded),
+            ),
+            const Expanded(
+              child: Center(
+                child: Text(
+                  AppStrings.appName,
+                ),
+              ),
+            ),
+            InkWell(
+              onTap: () {
+                AppNavigator.goSettings(context);
+              },
+              child: const Icon(Icons.settings_rounded),
+            )
+          ],
+        ),
       ),
-      body: BlocBuilder<ChatsBloc, ChatsState>(
-        builder: (context, state) {
-          if (state is ChatsLoading) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-          if (state is ChatsError) {
-            return Center(
-              child: Text(state.message),
-            );
-          }
-          return ListView.builder(
-            itemCount: bloc.chats.length,
-            itemBuilder: (context, index) {
-              return ChatTileWidget(
-                model: bloc.chats[index],
+      body: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: 16.w,
+          vertical: 8.h,
+        ),
+        child: BlocBuilder<ChatsBloc, ChatsState>(
+          builder: (context, state) {
+            if (state is ChatsLoading) {
+              return const Center(
+                child: CircularProgressIndicator(),
               );
-            },
-          );
-        },
+            }
+            if (state is ChatsError) {
+              return Center(
+                child: Text(state.message),
+              );
+            }
+            return ListView.builder(
+              itemCount: bloc.chats.length,
+              itemBuilder: (context, index) {
+                return ChatTileWidget(
+                  model: bloc.chats[index],
+                );
+              },
+            );
+          },
+        ),
       ),
     );
   }
