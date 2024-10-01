@@ -22,7 +22,7 @@ class AppColors {
   static final _subtextDark = Colors.white.withOpacity(0.5);
 
   static const _appBar = Color(0xffC8C7CB);
-  static final _appBarDark = Colors.black.withOpacity(0.2);
+  static final _appBarDark = const Color(0xff333380).withOpacity(0.5);
 
   static const _background = Color(0xffB2B2B2);
   static const _backgroundDark = Color(0xff3B3B43);

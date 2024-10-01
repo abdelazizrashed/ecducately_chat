@@ -1,5 +1,6 @@
 import 'package:educately_chat/config/app_colors.dart';
 import 'package:educately_chat/config/app_size.dart';
+import 'package:educately_chat/config/app_theme.dart';
 import 'package:educately_chat/modules/messaging/models/conv_message_model.dart';
 import 'package:educately_chat/modules/messaging/test_data/msg_model_test.dart';
 import 'package:educately_chat/modules/messaging/widgets/conv_message_widget.dart';
@@ -14,8 +15,7 @@ class ConversationScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
-      // TODO (abdelaziz): Fix App Bar
-      // appBar: _buildAppBar(),
+      appBar: _buildAppBar(context),
       // backgroundColor: ,
       body: Container(
         width: context.width,
@@ -40,7 +40,7 @@ class ConversationScreen extends StatelessWidget {
     return Align(
       alignment: Alignment.bottomCenter,
       child: ListView.separated(
-        itemCount: msgs.length,
+        itemCount: msgs.length + 1,
         padding: EdgeInsets.zero,
         reverse: true,
         shrinkWrap: true,
@@ -48,9 +48,17 @@ class ConversationScreen extends StatelessWidget {
           height: 2.h,
         ),
         itemBuilder: (context, index) {
+          // Extra padding so we can see the content behind the appBar
+          if (index == msgs.length) {
+            return SizedBox(
+              height: 110.h,
+            );
+          }
           final msg = msgs[index];
           bool isSecondary = false;
           if (index != 0) {
+            // if multiple consecutive messages from same user don't show
+            // name or photo
             if (msgs[index - 1].userId == msg.userId) {
               isSecondary = true;
             }
@@ -81,22 +89,57 @@ class ConversationScreen extends StatelessWidget {
     );
   }
 
-  PreferredSizeWidget _buildAppBar() {
+  PreferredSizeWidget _buildAppBar(BuildContext context) {
     final appBar = AppBar(
       elevation: 0,
       backgroundColor: AppColors.appBar,
+      title: Row(
+        children: [
+          IconButton(
+            icon: const Icon(Icons.arrow_back_ios),
+            onPressed: () {
+              // TODO (abdelaziz): Goback
+            },
+          ),
+          Expanded(
+            child: Column(
+              children: [
+                Text(
+                  "Sebastian",
+                  style: context.textTheme.s18.w800,
+                ),
+                Text(
+                  "last seen recently",
+                  style: context.textTheme.s14.w400.setColor(AppColors.subtext),
+                ),
+              ],
+            ),
+          ),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(50.r),
+            child: Image.network(
+              img1,
+              width: 37.r,
+              height: 37.r,
+              fit: BoxFit.cover,
+            ),
+          )
+        ],
+      ),
     );
     if (!AppColors.isDarkMode) {
       return appBar;
     }
     return PreferredSize(
-      preferredSize: const Size(
+      preferredSize: Size(
         double.infinity,
-        56.0,
+        50.0.h,
       ),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-        child: appBar,
+      child: ClipRRect(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+          child: appBar,
+        ),
       ),
     );
   }
