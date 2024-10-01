@@ -8,8 +8,11 @@ class DateTimeUtils {
   static String getLastSeen(DateTime time) {
     final now = DateTime.now();
     final diff = now.difference(time);
-    if (diff.inSeconds < 60) {
+    if (diff.inSeconds < 20) {
       return "Online";
+    }
+    if (diff.inSeconds < 60) {
+      return "Last seen less than a minute ago";
     }
     if (diff.inMinutes < 60) {
       return "Last seen ${diff.inMinutes} minutes ago";

@@ -6,7 +6,6 @@ import 'package:educately_chat/config/app_sp_man.dart';
 import 'package:educately_chat/modules/auth/models/user_model.dart';
 import 'package:educately_chat/modules/messaging/models/conversation_model.dart';
 import 'package:educately_chat/modules/messaging/models/message_model.dart';
-import 'package:educately_chat/modules/messaging/repo/conv_repo.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -16,15 +15,13 @@ part 'conv_event.dart';
 part 'conv_state.dart';
 
 class ConvBloc extends Bloc<ConvEvent, ConvState> {
+  // TODO (abdelaziz): Refactor this more.
+  // I don't have time now
+  // so I am leaving it as is.
   static ConvBloc of(BuildContext context) =>
       BlocProvider.of<ConvBloc>(context);
 
-  final ConvRepository _repository;
-
-  ConvBloc({
-    required ConvRepository repository,
-  })  : _repository = repository,
-        super(ConvInitial()) {
+  ConvBloc() : super(ConvInitial()) {
     on<ConvInitEvent>(_onConvInitEvent);
     on<ConvDeactvateEvent>(_onConvDeactvateEvent);
     on<ConvSendMsgEvent>(_onConvSendMessageEvent);
@@ -47,7 +44,7 @@ class ConvBloc extends Bloc<ConvEvent, ConvState> {
   String convId = "";
   Stream<QuerySnapshot<Map<String, dynamic>>>? msgsStream;
   Stream<DocumentSnapshot<Map<String, dynamic>>>? typingStream;
-  Stream<DocumentSnapshot<Map<String, dynamic>>>? onlineStream;
+  Stream? onlineStream;
 
   Future<void> _onConvInitEvent(
       ConvInitEvent event, Emitter<ConvState> emit) async {
@@ -194,22 +191,25 @@ class ConvBloc extends Bloc<ConvEvent, ConvState> {
     await _startOnlineStream(emit);
   }
 
-  Future<void> _startOnlineStream(emit) async {
+  Future<void> _startOnlineStream(Emitter<ConvState> emit) async {
     while (otherId.trim().isEmpty) {
       await Future.delayed(const Duration(seconds: 1));
     }
-    onlineStream = db.collection("users").doc(otherId).snapshots();
-    await emit.forEach<DocumentSnapshot<Map<String, dynamic>>>(
+    onlineStream = Stream.periodic(
+      Duration(seconds: minUpdatePeriodSecs),
+      (i) async {
+        final event = await db.collection("users").doc(otherId).get();
+        if (event.data()?["lastOnline"] != null) {
+          lastSeen = (event.data()!["lastOnline"] as Timestamp).toDate();
+        }
+        return event;
+      },
+    );
+    // onlineStream = db.collection("users").doc(otherId).snapshots();
+    await emit.forEach(
       onlineStream!,
-      onData: _onOnlineStream,
+      onData: (event) => ConvLoaded(),
       onError: (event, error) => ConvError(error.toString()),
     );
-  }
-
-  ConvLoaded _onOnlineStream(DocumentSnapshot<Map<String, dynamic>> event) {
-    if (event.data()?["lastOnline"] != null) {
-      lastSeen = (event.data()!["lastOnline"] as Timestamp).toDate();
-    }
-    return ConvLoaded();
   }
 }
