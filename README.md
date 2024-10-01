@@ -3,6 +3,8 @@
 A Real-Time Chat Interface with Firebase Integration, Online Status, and Typing Indicators (Android Only) Using a Basic Dark Theme (Figma design file).
 This Project is the Task for Senior Flutter Developer @ Educatly
 
+## Run [Android APK](https://drive.google.com/file/d/1AhL_U40wWSu708je2Cz0Zv3louZsUgOM/view?usp=sharing)
+
 ## Running The project
 
 * Flutter Version => 3.24.3
