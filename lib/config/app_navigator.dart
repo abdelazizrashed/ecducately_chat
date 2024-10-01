@@ -1,5 +1,6 @@
 import 'package:educately_chat/modules/auth/login_screen.dart';
 import 'package:educately_chat/modules/auth/signup_screen.dart';
+import 'package:educately_chat/modules/messaging/conversation_screen.dart';
 import 'package:flutter/material.dart';
 
 /// This is an interface for the navigation. The purpose is consalidate
@@ -25,6 +26,13 @@ class AppNavigator {
   static void goSignupScreen(BuildContext context) {
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (context) => const SignupScreen()),
+      (route) => false,
+    );
+  }
+
+  static void goConversationScreen(BuildContext context) {
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => const ConversationScreen()),
       (route) => false,
     );
   }

@@ -1,8 +1,8 @@
 import 'dart:async';
 
+import 'package:educately_chat/config/app_sp_man.dart';
 import 'package:educately_chat/modules/auth/repo/auth_repo.dart';
 import 'package:equatable/equatable.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -28,44 +28,33 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   Future<void> _onAuthLoginEvent(
       AuthLoginEvent event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
-    try {
-      final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: event.email,
-        password: event.password,
-      );
-      print(credential);
+    final user = await _repository.login(
+      email: event.email,
+      password: event.password,
+      onError: (msg) => emit(AuthError(msg)),
+    );
+    if (user != null) {
+      await AppSpMan.isLoggedIn.save(true);
+      await AppSpMan.user.save(user);
       emit(AuthLoaded());
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'weak-password') {
-        emit(const AuthError('weak-password'));
-      } else if (e.code == 'email-already-in-use') {
-        emit(const AuthError('email-already-in-use'));
-      }
-    } catch (e) {
-      emit(AuthError(e.toString()));
     }
   }
 
   Future<void> _onAuthSignEvent(
       AuthSignupEvent event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
-    try {
-      final credential =
-          await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: event.email,
-        password: event.password,
-      );
-      credential.user.uid;
-      print(credential);
+
+    final user = await _repository.signup(
+      email: event.email,
+      password: event.password,
+      name: event.name,
+      onError: (msg) => emit(AuthError(msg)),
+    );
+    if (user != null) {
+      await AppSpMan.isLoggedIn.save(true);
+      await AppSpMan.user.save(user);
+
       emit(AuthLoaded());
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'weak-password') {
-        emit(const AuthError('weak-password'));
-      } else if (e.code == 'email-already-in-use') {
-        emit(const AuthError('email-already-in-use'));
-      }
-    } catch (e) {
-      emit(AuthError(e.toString()));
     }
   }
 }

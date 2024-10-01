@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:educately_chat/modules/auth/models/user_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Interface for shared pereferences.
@@ -15,12 +18,15 @@ class AppSpMan {
 
   static SPBool isRemeberMe = SPBool(key: 'isRemeberMe');
   static SPString email = SPString(key: 'email');
-  static SPString password = SPString(key: 'password');
 
   static SPBool isLoggedIn = SPBool(key: 'isLoggedIn');
-  static SPString language = SPString(key: 'language');
+  static SPString uid = SPString(key: 'uid');
 
-  static SPString token = SPString(key: "token");
+  static SPCustom<UserModel> user = SPCustom<UserModel>(
+    key: 'user',
+    stringToVal: (value) => UserModel.fromJson(jsonDecode(value)),
+    valToString: (value) => jsonEncode(value.toJson()),
+  );
 }
 
 class SPBool {

@@ -3,8 +3,11 @@ import 'package:educately_chat/config/app_navigator.dart';
 import 'package:educately_chat/config/app_size.dart';
 import 'package:educately_chat/config/app_strings.dart';
 import 'package:educately_chat/config/app_theme.dart';
+import 'package:educately_chat/modules/auth/bloc/auth_bloc.dart';
+import 'package:educately_chat/utils/showtoast.dart';
 import 'package:educately_chat/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -16,8 +19,12 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
 
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
+    final bloc = AuthBloc.of(context);
     return Scaffold(
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
@@ -35,13 +42,30 @@ class _LoginScreenState extends State<LoginScreen> {
             SizedBox(
               height: 48.h,
             ),
-            CustomButton(
-              // TODO (abdelaziz):update loading
-              text: AppStrings.login,
-              onTap: () {
-                if (_formKey.currentState!.validate()) {
-                  // TODO (abdelaziz): Submit
+            BlocConsumer<AuthBloc, AuthState>(
+              listener: (context, state) {
+                if (state is AuthLoaded) {
+                  AppNavigator.goConversationScreen(context);
                 }
+                if (state is AuthError) {
+                  showToast(msg: state.message, isError: true);
+                }
+              },
+              builder: (context, state) {
+                return CustomButton(
+                  loading: state is AuthLoading,
+                  text: AppStrings.login,
+                  onTap: () {
+                    if (_formKey.currentState!.validate()) {
+                      bloc.add(
+                        AuthLoginEvent(
+                          emailController.text,
+                          passwordController.text,
+                        ),
+                      );
+                    }
+                  },
+                );
               },
             ),
 
@@ -80,7 +104,7 @@ class _LoginScreenState extends State<LoginScreen> {
       child: Column(
         children: [
           TextFormField(
-            // controller: emailController,
+            controller: emailController,
             decoration: InputDecoration(
               filled: true,
               fillColor: AppColors.background,
@@ -91,7 +115,7 @@ class _LoginScreenState extends State<LoginScreen> {
             height: 20.h,
           ),
           TextFormField(
-            // controller: passwordController,
+            controller: passwordController,
             obscureText: true,
             decoration: InputDecoration(
               filled: true,

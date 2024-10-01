@@ -10,4 +10,5 @@ class AppStrings {
   static const signup = "Sign Up";
   static const dontHaveAnAccount = "Don't have an account?";
   static const alreadyHaveAnAccount = "Already have an account?";
+  static const name = "Name";
 }

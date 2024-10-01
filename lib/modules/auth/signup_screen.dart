@@ -20,6 +20,7 @@ class _SignupScreenState extends State<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  final nameController = TextEditingController();
 
   @override
   void initState() {
@@ -48,7 +49,9 @@ class _SignupScreenState extends State<SignupScreen> {
             ),
             BlocConsumer<AuthBloc, AuthState>(
               listener: (context, state) {
-                // TODO (abdelaziz): Naviate on success
+                if (state is AuthLoaded) {
+                  AppNavigator.goConversationScreen(context);
+                }
                 if (state is AuthError) {
                   showToast(msg: state.message, isError: true);
                 }
@@ -59,7 +62,13 @@ class _SignupScreenState extends State<SignupScreen> {
                   text: AppStrings.signup,
                   onTap: () {
                     if (_formKey.currentState!.validate()) {
-                      bloc.add(AuthSignupEvent(emailController.text, passwordController.text));
+                      bloc.add(
+                        AuthSignupEvent(
+                          emailController.text,
+                          passwordController.text,
+                          nameController.text,
+                        ),
+                      );
                     }
                   },
                 );
@@ -100,6 +109,17 @@ class _SignupScreenState extends State<SignupScreen> {
       key: _formKey,
       child: Column(
         children: [
+          TextFormField(
+            controller: nameController,
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: AppColors.background,
+              hintText: AppStrings.name,
+            ),
+          ),
+          SizedBox(
+            height: 20.h,
+          ),
           TextFormField(
             controller: emailController,
             decoration: InputDecoration(
